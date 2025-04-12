@@ -136,6 +136,26 @@
     "Trilha Formativa: Formadores": "tff.csv"
   };
 
+function identificarAtividades(headers) {
+  return headers.map((h, i) => ({ h, i }))
+                .filter(col => /(Lição|Discussão|Fórum)/i.test(col.h));
+}
+
+function agruparPorModulo(colunas) {
+  const modulos = [];
+  let moduloAtual = [];
+  colunas.forEach(({ h, i }) => {
+    if (/Lição 1/i.test(h) && moduloAtual.length > 0) {
+      modulos.push(moduloAtual);
+      moduloAtual = [];
+    }
+    moduloAtual.push(i);
+  });
+  if (moduloAtual.length) modulos.push(moduloAtual);
+  return modulos;
+}
+
+
 let cursos = [];
 let atividadeCurso = {};
 let modulosCurso = {};
@@ -269,6 +289,7 @@ async function carregarDados() {
           });
         });
       }
+
       });
     }
   }

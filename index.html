@@ -1,0 +1,256 @@
+<!-- HTML COMPLETO COM LEITURA DO CSV COM MELHORIAS E TABELA RESPONSIVA -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Painel de Inscrições</title>
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" />
+  <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.bootstrap5.min.css" />
+  <style>
+    body { background: #f4f6f9; font-family: 'Raleway', sans-serif; padding: 20px; }
+    .gradient-box { color: white; padding: 20px; border-radius: 15px; margin-bottom: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+    .bg-grad-1 { background: linear-gradient(135deg, #0D47A1, #1976D2); }
+    .bg-grad-2 { background: linear-gradient(135deg, #2E7D32, #66BB6A); }
+    .bg-grad-3 { background: linear-gradient(135deg, #6A1B9A, #BA68C8); }
+    .bg-grad-4 { background: linear-gradient(135deg, #FF8F00, #FFB300); }
+    .bg-grad-5 { background: linear-gradient(135deg, #C62828, #EF5350); }
+    .card { border: none; border-radius: 12px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+    .insight-box { padding: 20px; color: white; border-radius: 15px; min-height: 200px; }
+    .fa-icon { font-size: 2rem; margin-right: 10px; }
+    .graficos-pizza .card { height: 420px; }
+  
+    .navbar-nav .nav-link {
+      color: #ffffff !important;
+    }
+    .navbar-nav .nav-link.active {
+      border-bottom: 3px solid white;
+    }
+    
+</style>
+</head>
+<body>
+
+
+<nav class="navbar fixed-top navbar-expand-lg" style="background-color: #03665c; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); margin-bottom: 30px;">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="#">
+      <img src="https://escolavirtual.educacao.go.gov.br/pluginfile.php/1025398/mod_page/content/1/logorf.png" alt="Logo Raízes Formativas" height="50" class="me-2">
+    </a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active" aria-current="page" href="index.html">Progresso no Curso</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="modulos.html">Módulos dos Cursos</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<div class="container" style="padding-top: 90px;">
+
+  <center>
+    <h4 style="color: #008ffb;">Painel de Monitoramento da Formação Online do Projeto Raízes Formativas da SEEDUC GO.</h4>
+    <br>
+  </center>
+
+  <!-- Linha 1: Totais com ícones -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="gradient-box bg-grad-1 text-center">
+        <h5><i class="fas fa-users fa-icon"></i> Total de Inscritos</h5>
+        <h2 id="totalInscritos">...</h2>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="gradient-box bg-grad-2 text-center">
+        <h5><i class="fas fa-graduation-cap fa-icon"></i> Total de Concluintes</h5>
+        <h2 id="totalConcluintes">...</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha 2: Gráficos de Pizza -->
+  <div class="row graficos-pizza">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h6 class="text-center">Inscrições por Curso</h6>
+        <div id="inscricoesPorCurso"></div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card p-3">
+        <h6 class="text-center">Conclusões por Curso</h6>
+        <div id="conclusoesPorCurso"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha 3: Engajamento -->
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card p-3">
+        <h6 class="text-center">Taxa de Engajamento por Curso</h6>
+        <div id="graficoEngajamento"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha 4: Filtro + Tabela -->
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label for="filtroCurso" class="form-label">Filtrar por Curso:</label>
+      <select id="filtroCurso" class="form-select">
+        <option value="">Todos os cursos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card p-3 table-responsive">
+        <table id="tabelaInscricoes" class="table table-bordered table-striped" style="width:100%">
+          <thead>
+            <tr>
+              <th>Nome</th><th>Email</th><th>Cidade</th><th>Curso</th>
+              <th>Progresso</th><th>Conclusão</th>
+              <th>Inscrição</th><th>Data de Conclusão</th><th>Último Acesso</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Linha 5: Insights -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="insight-box bg-grad-4">
+        <i class="fas fa-exclamation-triangle fa-icon"></i>
+        <strong>Cursos com baixa taxa de conclusão:</strong>
+        <ul id="cursosAlerta"></ul>
+        <p><em>Sugestão:</em> Rever a comunicação, enviar comunicados aos cursistas e regionais para estimular o acesso ao site. Fazer campanhas de comunicação.</p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="insight-box bg-grad-5">
+        <i class="fas fa-lightbulb fa-icon"></i>
+        <strong>Insight Relevante:</strong>
+        <p>Curso com maior engajamento: <span id="cursoTopEngajamento">...</span></p>
+        <p><em>Sugestão:</em> Enviar mensagens para os cursistas pelo Fórum de Avisos incentivando a participação na plataforma.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+async function carregarDados() {
+  const response = await fetch('dadosrf.csv');
+  const csv = await response.text();
+  const data = Papa.parse(csv, { header: true, skipEmptyLines: true }).data;
+
+  document.getElementById('totalInscritos').textContent = data.length;
+  document.getElementById('totalConcluintes').textContent = data.filter(d => d.conclusao.toLowerCase() === 'sim').length;
+
+  const cursos = [...new Set(data.map(d => d.curso))];
+  cursos.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c;
+    opt.textContent = c;
+    document.getElementById('filtroCurso').appendChild(opt);
+  });
+
+  const inscricoesPorCurso = cursos.map(c => data.filter(d => d.curso === c).length);
+  new ApexCharts(document.querySelector("#inscricoesPorCurso"), {
+    chart: { type: 'pie' },
+    labels: cursos,
+    series: inscricoesPorCurso,
+    dataLabels: {
+      formatter: function (val, opts) {
+        return opts.w.config.series[opts.seriesIndex];
+      }
+    }
+  }).render();
+
+  const conclusoesPorCurso = cursos.map(c => data.filter(d => d.curso === c && d.conclusao.toLowerCase() === 'sim').length);
+  new ApexCharts(document.querySelector("#conclusoesPorCurso"), {
+    chart: { type: 'pie' },
+    labels: cursos,
+    series: conclusoesPorCurso,
+    dataLabels: {
+      formatter: function (val, opts) {
+        return opts.w.config.series[opts.seriesIndex];
+      }
+    }
+  }).render();
+
+  const engajamentoData = cursos.map(c => {
+    const inscritos = data.filter(d => d.curso === c).length;
+    const concluintes = data.filter(d => d.curso === c && d.conclusao.toLowerCase() === 'sim').length;
+    return {
+      nome: c,
+      valor: inscritos > 0 ? parseFloat((concluintes / inscritos * 100).toFixed(1)) : 0
+    }
+  }).sort((a, b) => b.valor - a.valor);
+  new ApexCharts(document.querySelector("#graficoEngajamento"), {
+    chart: { type: 'bar', height: 400 },
+    series: [{ name: 'Engajamento (%)', data: engajamentoData.map(e => e.valor) }],
+    xaxis: { categories: engajamentoData.map(e => e.nome) }
+  }).render();
+
+  const lista = document.getElementById('cursosAlerta');
+  engajamentoData.filter(e => e.valor < 50).forEach(c => {
+    const li = document.createElement('li');
+    li.textContent = `${c.nome} (${c.valor}%)`;
+    lista.appendChild(li);
+  });
+  document.getElementById('cursoTopEngajamento').textContent = engajamentoData[0]?.nome || 'N/A';
+
+  const tbody = document.querySelector("#tabelaInscricoes tbody");
+  data.forEach(d => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${d.nomecompleto}</td><td>${d.email}</td><td>${d.cidade}</td><td>${d.curso}</td>
+                    <td>${d.progresso}</td><td>${d.conclusao}</td>
+                    <td>${d.inscricao}</td><td>${d["conclusao.1"]}</td><td>${d.ultimoacesso}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  const tabela = $('#tabelaInscricoes').DataTable({
+    dom: 'Bfrtip',
+    language: {
+      url: "https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+    },
+    scrollX: true,
+    buttons: [ 'copy', 'csv', 'excel', 'pdf', 'print' ]
+  });
+
+  document.getElementById('filtroCurso').addEventListener('change', function () {
+    tabela.column(3).search(this.value).draw();
+  });
+}
+carregarDados();
+</script>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
+<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
+
+</body>
+</html>

@@ -122,39 +122,19 @@
 <script>
 
   const cursoMap = {
-    "Formação de Professores de Língua Portuguesa": "progress.fplp25.csv",
-    "Formação de Professores de Língua Inglesa": "progress.fpling25.csv",
-    "Formação de Professores de Arte": "progress.fpart25.csv",
-    "Formação de Professores de Química": "progress.fpqui25.csv",
-    "Formação de Professores de Matemática": "progress.fpmat25.csv",
-    "Formação de Professores de Física": "progress.fpfis25.csv",
-    "Formação de Professores de Filosofia": "progress.fpfilo25.csv",
-    "Formação de Professores de Sociologia": "progress.fpsocio25.csv",
-    "Formação de Professores de Biologia": "progress.fpbio25.csv",
-    "Formação de Professores de Geografia": "progress.fpgeo25.csv",
-    "Formação de Professores de História": "progress.fphist25.csv",
-    "Trilha Formativa: Formadores": "progress.trilha_formativa_formadores.csv"
+    "Formação de Professores de Arte": "fpa.csv",
+    "Formação de Professores de Biologia": "fpb.csv",
+    "Formação de Professores de Filosofia": "fpfil.csv",
+    "Formação de Professores de Física": "fpfis.csv",
+    "Formação de Professores de Geografia": "fpg.csv",
+    "Formação de Professores de História": "fph.csv",
+    "Formação de Professores de Língua Inglesa": "fpli.csv",
+    "Formação de Professores de Língua Portuguesa": "fplp.csv",
+    "Formação de Professores de Matemática": "fpm.csv",
+    "Formação de Professores de Química": "fpq.csv",
+    "Formação de Professores de Sociologia": "fps.csv",
+    "Trilha Formativa: Formadores": "tff.csv"
   };
-
-function identificarAtividades(headers) {
-  return headers.map((h, i) => ({ h, i }))
-                .filter(col => /(Lição|Discussão|Fórum)/i.test(col.h));
-}
-
-function agruparPorModulo(colunas) {
-  const modulos = [];
-  let moduloAtual = [];
-  colunas.forEach(({ h, i }) => {
-    if (/Lição 1/i.test(h) && moduloAtual.length > 0) {
-      modulos.push(moduloAtual);
-      moduloAtual = [];
-    }
-    moduloAtual.push(i);
-  });
-  if (moduloAtual.length) modulos.push(moduloAtual);
-  return modulos;
-}
-
 
 let cursos = [];
 let atividadeCurso = {};

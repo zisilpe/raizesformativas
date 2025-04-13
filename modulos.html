@@ -122,18 +122,18 @@
 <script>
 
   const cursoMap = {
-    "Formação de Professores de Arte": "fpa.csv",
-    "Formação de Professores de Biologia": "fpb.csv",
-    "Formação de Professores de Filosofia": "fpfil.csv",
-    "Formação de Professores de Física": "fpfis.csv",
-    "Formação de Professores de Geografia": "fpg.csv",
-    "Formação de Professores de História": "fph.csv",
-    "Formação de Professores de Língua Inglesa": "fpli.csv",
-    "Formação de Professores de Língua Portuguesa": "fplp.csv",
-    "Formação de Professores de Matemática": "fpm.csv",
-    "Formação de Professores de Química": "fpq.csv",
-    "Formação de Professores de Sociologia": "fps.csv",
-    "Trilha Formativa: Formadores": "tff.csv"
+    "Formação de Professores de Língua Portuguesa": "progress.fplp25.csv",
+    "Formação de Professores de Língua Inglesa": "progress.fpling25.csv",
+    "Formação de Professores de Arte": "progress.fpart25.csv",
+    "Formação de Professores de Química": "progress.fpqui25.csv",
+    "Formação de Professores de Matemática": "progress.fpmat25.csv",
+    "Formação de Professores de Física": "progress.fpfis25.csv",
+    "Formação de Professores de Filosofia": "progress.fpfilo25.csv",
+    "Formação de Professores de Sociologia": "progress.fpsocio25.csv",
+    "Formação de Professores de Biologia": "progress.fpbio25.csv",
+    "Formação de Professores de Geografia": "progress.fpgeo25.csv",
+    "Formação de Professores de História": "progress.fphist25.csv",
+    "Trilha Formativa: Formadores": "progress.trilha_formativa_formadores.csv"
   };
 
 let cursos = [];
@@ -245,6 +245,7 @@ async function carregarDados() {
       corpo.innerHTML += `<tr><td>${nome}</td><td>${email}</td>${tds.join('')}<td>${total}</td></tr>`;
     }
 
+    $.fn.dataTable.isDataTable('#tabelaModulos') && $('#tabelaModulos').DataTable().destroy();
     $('#tabelaModulos').DataTable({
       dom: 'Bfrtip',
       language: {

@@ -140,8 +140,8 @@ let cursos = [];
 let atividadeCurso = {};
 let modulosCurso = {};
 let progressoSemanal = {};
-let cursoMaisAtividades = { nome: '', total: 0 };
-let cursoMenosModulos = { nome: '', total: Infinity };
+
+
 
 async function carregarDados() {
   // Carregar lista de cursos do arquivo oficial
@@ -163,11 +163,11 @@ async function carregarDados() {
   await new Promise(resolve => setTimeout(resolve, 500)); // pequeno atraso para leitura
   cursos = Array.from(cursosSet);
 
-  const atividadeCurso = {};
-  const modulosCurso = {};
-  const progressoSemanal = {};
-  let cursoMaisAtividades = { nome: '', total: 0 };
-  let cursoMenosModulos = { nome: '', total: Infinity };
+  atividadeCurso = {};
+  modulosCurso = {};
+  progressoSemanal = {};
+  
+  
 
   for (const curso of cursos) {
     
@@ -273,9 +273,8 @@ async function carregarDados() {
 
       });
     }
-  }
 
-  document.getElementById("cursoMaisAtividades").textContent = cursoMaisAtividades.nome;
+    document.getElementById("cursoMaisAtividades").textContent = cursoMaisAtividades.nome;
   document.getElementById("cursoMenosModulos").textContent = cursoMenosModulos.nome;
 
   new ApexCharts(document.querySelector("#graficoAtividadesCurso"), {

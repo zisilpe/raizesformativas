@@ -5,8 +5,8 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>Módulos dos Cursos</title>
-<script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=ybeWaM6ZaDirszGRrvpjn5BxGJhCH5tD2aZaf30ra_R5msX9lCFyAmVjM0mH9_W35HVf2AJ-CvQ01LMt47845pIQ9kXsE4_6u_fmPepfm2k-mtuiOUlYwjum32UdsFZsWWL6AwRCLsz47BU2meHW0LrFuhwQiGv67plYOjeu47o" charset="UTF-8"></script><script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;600&amp;display=swap" rel="stylesheet"/>
@@ -68,10 +68,10 @@
 </div>
 </nav>
 <div class="container">
-  <center>
-    <h4 style="color: #008ffb;">Progresso dos cursistas em cada Módulo dos cursos.</h4>
-    <br>
-  </center>
+<center>
+<h4 style="color: #008ffb;">Progresso dos cursistas em cada Módulo dos cursos.</h4>
+<br/>
+</center>
 <div class="row mb-4">
 <div class="col-md-6">
 <div class="gradient-box bg-grad-1">
@@ -119,200 +119,140 @@
 </div>
 </div>
 </div>
+
+
+
+
+
+
+
+
+
+
+
 <script>
 
-  const cursoMap = {
-    "Formação de Professores de Língua Portuguesa": "progress.fplp25.csv",
-    "Formação de Professores de Língua Inglesa": "progress.fpling25.csv",
-    "Formação de Professores de Arte": "progress.fpart25.csv",
-    "Formação de Professores de Química": "progress.fpqui25.csv",
-    "Formação de Professores de Matemática": "progress.fpmat25.csv",
-    "Formação de Professores de Física": "progress.fpfis25.csv",
-    "Formação de Professores de Filosofia": "progress.fpfilo25.csv",
-    "Formação de Professores de Sociologia": "progress.fpsocio25.csv",
-    "Formação de Professores de Biologia": "progress.fpbio25.csv",
-    "Formação de Professores de Geografia": "progress.fpgeo25.csv",
-    "Formação de Professores de História": "progress.fphist25.csv",
-    "Trilha Formativa: Formadores": "progress.trilha_formativa_formadores.csv"
+// === MAPEAMENTO DE CURSOS PARA ARQUIVOS ===
+const cursoMap = {
+  "Formação de Professores de Língua Portuguesa": "progress.fplp25.csv",
+  "Formação de Professores de Língua Inglesa": "progress.fpling25.csv",
+  "Formação de Professores de Arte": "progress.fpart25.csv",
+  "Formação de Professores de Química": "progress.fpqui25.csv",
+  "Formação de Professores de Matemática": "progress.fpmat25.csv",
+  "Formação de Professores de Física": "progress.fpfis25.csv",
+  "Formação de Professores de Filosofia": "progress.fpfilo25.csv",
+  "Formação de Professores de Sociologia": "progress.fpsocio25.csv",
+  "Formação de Professores de Biologia": "progress.fpbio25.csv",
+  "Formação de Professores de Geografia": "progress.fpgeo25.csv",
+  "Formação de Professores de História": "progress.fphist25.csv",
+  "Trilha Formativa: Formadores": "progress.trilha_formativa_formadores.csv"
+};
+
+document.addEventListener("DOMContentLoaded", async () => {
+  const atividadesCurso = {};
+  const modulosCurso = {};
+  const progressoSemanal = {};
+  const tabelaDados = [];
+
+  const carregarCSV = (path) => {
+    return new Promise((resolve) => {
+      Papa.parse('cursos/' + path, {
+        download: true,
+        complete: (results) => resolve(results.data)
+      });
+    });
   };
 
-let cursos = [];
-let atividadeCurso = {};
-let modulosCurso = {};
-let progressoSemanal = {};
+  const processarCurso = async (nome, arquivo) => {
+    const data = await carregarCSV(arquivo);
+    const headers = data[0];
+    const linhas = data.slice(1).filter(l => l[0]);
 
+    const colAtividades = headers
+      .map((h, i) => ({ header: h, index: i }))
+      .filter(col => col.header && /(li[cç][aão]|f[oó]rum|discuss[aã]o)/i.test(col.header));
 
-
-async function carregarDados() {
-  // Carregar lista de cursos do arquivo oficial
-  const base = await fetch('dadosrf.csv');
-  const textoBase = await base.text();
-  const cursosSet = new Set();
-  Papa.parse(textoBase, {
-    header: true,
-    skipEmptyLines: true,
-    complete: function(results) {
-      results.data.forEach(row => {
-        if (row.curso && !cursosSet.has(row.curso)) {
-          cursosSet.add(row.curso);
-        }
-      });
-    }
-  });
-
-  await new Promise(resolve => setTimeout(resolve, 500)); // pequeno atraso para leitura
-  cursos = Array.from(cursosSet);
-
-  atividadeCurso = {};
-  modulosCurso = {};
-  progressoSemanal = {};
-  
-  
-
-  for (const curso of cursos) {
-    
-        const csvFile = cursoMap[curso];
-        if (!csvFile) {
-          console.warn(`Arquivo CSV não encontrado para o curso: ${curso}`);
-          continue;
-        }
-        const response = await fetch("cursos/" + csvFile);
-        
-    const text = await response.text();
-    const csv = Papa.parse(text, { skipEmptyLines: true }).data;
-
-    const header = csv[0];
-    const dados = csv.slice(1);
-    const modulos = [];
+    let modulos = [];
     let moduloAtual = [];
 
-    
-    for (let i = 1; i < header.length; i += 2) { // pula colunas de datas
-
-      if (header[i].includes("Lição 1")) {
-        if (moduloAtual.length > 0) modulos.push(moduloAtual);
-        moduloAtual = [i];
-      } else {
-        moduloAtual.push(i);
+    colAtividades.forEach(col => {
+      if (/li[cç][aão] 1/i.test(col.header) && moduloAtual.length > 0) {
+        modulos.push(moduloAtual);
+        moduloAtual = [];
       }
-    }
+      moduloAtual.push(col.index);
+    });
     if (moduloAtual.length > 0) modulos.push(moduloAtual);
 
-    const atividadesConcluidas = dados.reduce((total, row) => {
-      return total + row.filter((v, i) => i > 0 && v.toLowerCase() === 'concluída').length;
-    }, 0);
-
-    atividadeCurso[curso] = atividadesConcluidas;
-    if (atividadesConcluidas > cursoMaisAtividades.total) {
-      cursoMaisAtividades = { nome: curso, total: atividadesConcluidas };
-    }
-
-    const modulosConcluidos = dados.reduce((total, row) => {
-      let count = 0;
-      for (const mod of modulos) {
-        const concluidas = mod.filter(i => row[i]?.toLowerCase() === 'concluída').length;
-        if (concluidas === mod.length) count++;
-      }
-      return total + count;
-    }, 0);
-
-    modulosCurso[curso] = modulosConcluidos;
-    if (modulosConcluidos < cursoMenosModulos.total) {
-      cursoMenosModulos = { nome: curso, total: modulosConcluidos };
-    }
-
-    // Gráfico semanal (usando datas fictícias por enquanto)
-    const semanas = ["01/04", "08/04", "15/04", "22/04", "29/04"];
-    semanas.forEach((s, i) => {
-      progressoSemanal[s] = (progressoSemanal[s] || 0) + Math.floor(modulosConcluidos * Math.random());
+    const concluidos = linhas.map(row => {
+      return modulos.map(mod => mod.filter(i => row[i + 1]).length); // i+1 pega a coluna de data
     });
 
-    // Tabela por módulo
-    const tabela = document.getElementById("tabelaModulos");
-    const cabecalho = document.getElementById("cabecalhoTabela");
-    const corpo = document.getElementById("corpoTabela");
-    cabecalho.innerHTML = `<th>Nome</th><th>Email</th>${modulos.map((_, i) => `<th>Módulo ${i + 1}</th>`).join('')}<th>Total</th>`;
+    const totalPorModulo = concluidos.reduce((acc, cur) => {
+      cur.forEach((v, i) => acc[i] = (acc[i] || 0) + (v > 0 ? 1 : 0));
+      return acc;
+    }, []);
 
-    for (const row of dados) {
-      const nome = row[0];
-      const email = row[1];
-      let total = 0;
-      const tds = modulos.map((mod, mIndex) => {
-        const concluido = mod.filter(i => row[i]?.toLowerCase() === 'concluída').length;
-        total += concluido;
-        return `<td data-modulo="Módulo ${mIndex + 1}" data-curso="${curso}">${concluido}/${mod.length}</td>`;
-      });
-      corpo.innerHTML += `<tr><td>${nome}</td><td>${email}</td>${tds.join('')}<td>${total}</td></tr>`;
-    }
+    atividadesCurso[nome] = colAtividades.length;
+    modulosCurso[nome] = modulos.length;
 
-    $.fn.dataTable.isDataTable('#tabelaModulos') && $('#tabelaModulos').DataTable().destroy();
-    $('#tabelaModulos').DataTable({
-      dom: 'Bfrtip',
-      language: {
-        url: 'https://cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json'
-      },
-      buttons: ['copy', 'csv', 'excel', 'pdf', 'print'],
-      initComplete: function () {
-        const api = this.api();
-        api.columns().every(function () {
-          const column = this;
-          const select = $('<select><option value="">Filtrar</option></select>')
-            .appendTo($(column.header()).empty())
-            .on('change', function () {
-              const val = $.fn.dataTable.util.escapeRegex($(this).val());
-              column.search(val ? '^' + val + '$' : '', true, false).draw();
-            });
+    linhas.forEach((linha, li) => {
+      const nomeEstudante = linha[0];
+      const email = linha[1];
+      const progresso = concluidos[li];
+      const totalAtiv = progresso.reduce((a, b) => a + b, 0);
 
-          column.data().unique().sort().each(function (d) {
-            if (typeof d === 'string' && d.length < 100) {
-              select.append('<option value="' + d + '">' + d + '</option>');
-            }
-          });
-        });
-      }
+      const linhaTabela = {
+        Nome: nomeEstudante,
+        Email: email,
+        Curso: nome,
+        ...Object.fromEntries(progresso.map((v, i) => [`Módulo ${i + 1}`, v])),
+        Total: totalAtiv
+      };
 
-      });
-    }
+      tabelaDados.push(linhaTabela);
+    });
+  };
 
-    document.getElementById("cursoMaisAtividades").textContent = cursoMaisAtividades.nome;
-  document.getElementById("cursoMenosModulos").textContent = cursoMenosModulos.nome;
+  for (const [nome, arquivo] of Object.entries(cursoMap)) {
+    await processarCurso(nome, arquivo);
+  }
 
+  // GRÁFICOS
   new ApexCharts(document.querySelector("#graficoAtividadesCurso"), {
     chart: { type: 'pie' },
-    series: Object.values(atividadeCurso),
-    labels: Object.keys(atividadeCurso),
-    dataLabels: {
-      formatter: (val, opts) => opts.w.config.series[opts.seriesIndex]
-    }
+    series: Object.values(atividadesCurso),
+    labels: Object.keys(atividadesCurso)
   }).render();
 
   new ApexCharts(document.querySelector("#graficoModulosCurso"), {
     chart: { type: 'pie' },
     series: Object.values(modulosCurso),
-    labels: Object.keys(modulosCurso),
-    dataLabels: {
-      formatter: (val, opts) => opts.w.config.series[opts.seriesIndex]
-    }
+    labels: Object.keys(modulosCurso)
   }).render();
 
-  new ApexCharts(document.querySelector("#graficoProgressoSemanal"), {
-    chart: { type: 'bar', height: 400 },
-    series: [{ name: 'Concluídos', data: Object.values(progressoSemanal) }],
-    xaxis: { categories: Object.keys(progressoSemanal) }
-  }).render();
+  // TABELA
+  const colunas = Object.keys(tabelaDados[0]);
+  const cabecalho = document.getElementById("cabecalhoTabela");
+  cabecalho.innerHTML = colunas.map(c => `<th>${c}</th>`).join("");
 
+  const corpo = document.getElementById("corpoTabela");
+  corpo.innerHTML = tabelaDados.map(row => {
+    return "<tr>" + colunas.map(k => `<td>${row[k]}</td>`).join("") + "</tr>";
+  }).join("");
 
-carregarDados();
-</script>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.bootstrap5.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/pdfmake.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.36/vfs_fonts.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.html5.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/2.4.1/js/buttons.print.min.js"></script>
-</body>
+  if ($.fn.dataTable.isDataTable("#tabelaModulos")) {
+    $('#tabelaModulos').DataTable().clear().destroy();
+  }
+
+  $('#tabelaModulos').DataTable({
+    language: {
+      url: "//cdn.datatables.net/plug-ins/1.13.6/i18n/pt-BR.json"
+    },
+    dom: 'Bfrtip',
+    buttons: ['copy', 'csv', 'excel', 'pdf', 'print']
+  });
+
+});
+</script></body>
 </html>
